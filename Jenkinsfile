@@ -2,16 +2,21 @@
 
 pipeline {
 
-  agent any
+  agent none
 
-  environment {
-    GIT_BRANCH_NAME = sh (script: 'git name-rev --name-only HEAD', returnStdout: true).trim().minus(~/^remotes\/origin\//)
-    IS_SNAPSHOT = getMavenVersion().endsWith("-SNAPSHOT")
-    MAVEN_CONFIG = " -Dform-dist-repo.snapshots.url=${params.MAVEN_SNAPSHOTS_REPO}"
-  }
 
   stages {
     stage('Init') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
+      environment {
+        GIT_BRANCH_NAME = sh (script: 'git name-rev --name-only HEAD', returnStdout: true).trim().minus(~/^remotes\/origin\//)
+        IS_SNAPSHOT = getMavenVersion().endsWith("-SNAPSHOT")
+        MAVEN_CONFIG = " -Dform-dist-repo.snapshots.url=${params.MAVEN_SNAPSHOTS_REPO}"
+      }
       steps {
         script {
           echo "init"
