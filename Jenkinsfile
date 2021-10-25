@@ -9,7 +9,7 @@ pipeline {
     stage('Init') {
       agent {
         docker {
-          image 'eclipse-temurin:17-jdk'
+          image 'eclipse-temurin:8-jdk'
         }
       }
       environment {
