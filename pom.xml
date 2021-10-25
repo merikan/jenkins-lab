@@ -15,7 +15,7 @@
   <description>Testcontainers with Spring Boot and Junit 5</description>
 
   <properties>
-    <java.version>1.8</java.version>
+    <java.version>17</java.version>
     <testcontainers.version>1.16.2</testcontainers.version>
   </properties>
 
