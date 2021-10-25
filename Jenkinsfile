@@ -56,6 +56,7 @@ pipeline {
       agent {
         docker {
           image 'eclipse-temurin:17-jdk'
+          args '--volume /var/run/docker.sock:/var/run/docker.sock'
         }
       }
       steps {
