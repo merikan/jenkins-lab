@@ -8,22 +8,25 @@ pipeline {
   stages {
     stage('Init') {
       agent {
-        docker {
-          image 'eclipse-temurin:8-jdk'
+        dockerfile {
+          dir '.jenkins'
+          filename 'Dockerfile-init'
         }
-      }
-      environment {
-        GIT_BRANCH_NAME = sh (script: 'git name-rev --name-only HEAD', returnStdout: true).trim().minus(~/^remotes\/origin\//)
-        IS_SNAPSHOT = getMavenVersion().endsWith("-SNAPSHOT")
-        MAVEN_CONFIG = " -Dform-dist-repo.snapshots.url=${params.MAVEN_SNAPSHOTS_REPO}"
       }
       steps {
         script {
-          echo "init"
+          env.GIT_BRANCH_NAME = sh (script: 'git name-rev --name-only HEAD', returnStdout: true).trim().minus(~/^remotes\/origin\//)
+          env.IS_SNAPSHOT = getMavenVersion().endsWith("-SNAPSHOT")
+          env.MAVEN_CONFIG = " -Dform-dist-repo.snapshots.url=${params.MAVEN_SNAPSHOTS_REPO}"
         }
       }
     }
     stage('Build') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
       steps {
         script {
           tags_extra = GIT_BRANCH_NAME ==~ /develop/ ? 'develop' : ''
@@ -34,6 +37,11 @@ pipeline {
       }
     }
     stage('Unit test') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
       steps {
         unstash 'jar'
         sh './mvnw -B test'
@@ -45,6 +53,11 @@ pipeline {
       }
     }
     stage('Integration test') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
       steps {
         unstash 'jar'
         sh './mvnw -B -Ddocker.skip verify'
@@ -56,14 +69,24 @@ pipeline {
       }
     }
     stage('Static Analysis') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
       steps {
         // TODO: run static analyses pmt, findbugs, etc
         echo "Done"
       }
     }
     stage('Functional tests') {
+      agent {
+        docker {
+          image 'eclipse-temurin:17-jdk'
+        }
+      }
       steps {
-        // TODO: run functional tests from image (docker-compose)
+        // TODO: run functional tests
         sh 'echo Functional test'
       }
     }
